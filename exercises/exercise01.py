@@ -23,11 +23,11 @@ def main():
     print("Writing done")
 
 def data():
-    with open('./data/training_x.dat', 'rb') as pickleFile:
+    with open('../data/training_x.dat', 'rb') as pickleFile:
         x_tr = pickle.load(pickleFile)
-    with open('./data/training_y.dat', 'rb') as pickleFile:
+    with open('../data/training_y.dat', 'rb') as pickleFile:
         y_tr = pickle.load(pickleFile)
-    with open('./data/validation_x.dat', 'rb') as pickleFile:
+    with open('../data/validation_x.dat', 'rb') as pickleFile:
         x_val = pickle.load(pickleFile)
 
     num_imgs_tr = len(y_tr)
