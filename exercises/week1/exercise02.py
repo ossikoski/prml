@@ -1,7 +1,7 @@
 """
 Exercise Set 2: Estimation theory
 1. LS and ML estimators
-Team name in kaggle: Ossi Koski
+Ossi Koski
 """
 
 import matplotlib.pyplot as plt
