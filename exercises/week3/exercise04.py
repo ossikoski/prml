@@ -5,21 +5,37 @@ Exercise Set 3: Linear models in machine learning
 Ossi Koski
 """
 
+import pandas as pd
+
+import copy
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.core.fromnumeric import transpose
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import MinMaxScaler
 
 
 def main():
     X = np.loadtxt('X.dat', unpack = True)
     y = np.loadtxt('y.dat', unpack = True)
 
+    # Normalize data
+    X = (X - X.mean())/np.std(X)
+
+    # For pandas
+    data = {'col1': X[0, :], 'col2': X[1, :]}
+    df = pd.DataFrame(data=data)
+
+    # Remap ground truth values
+    scaler = MinMaxScaler()
+    y = scaler.fit_transform(y.reshape(-1, 1))
+    y = y.flatten()
+
     # Task 1
     logregr1 = LogisticRegression()
-    logregr1.fit(np.transpose(X), y)
+    logregr1.fit(X.T, y)
     print(logregr1.coef_)
-    y_hat1 = logregr1.predict(np.transpose(X))
+    y_hat1 = logregr1.predict(X.T)
 
     print(accuracy(y_hat1, y))
 
@@ -32,23 +48,57 @@ def main():
     print(accuracy(y_hat1b, y))
 
     # Task 2
-    w = np.transpose(np.array([1, -1]))
-    lr = 0.001
+    w = np.array([[1, -1]]).T
+    lr = 0.1
+    steps = 1000
+    w_list = np.zeros(shape=(steps, 2, 1))  # For plotting of w trajectory
 
-    for i in range(100):
-        w_ = w - lr * gradient_sse_own(X, y, w)
-        print(w)
+    for i in range(steps):
+        w0 = w[0][0] - lr * gradient_sse(X, y, w, 0)[0]
+        
+        w1 = w[1][0] - lr * gradient_sse(X, y, w, 1)[0]
+        w = np.array([[w0, w1]]).T
 
-def gradient_sse_own(X, y, w):
+        w_list[i] = w
+        
+    print("\nWeights task 2", w)
+
+    plot_weights(w_list, logregr1b.coef_)
+
+    y_hat2 = list()
+    for n, _ in enumerate(X):
+        predn = logsig(np.matmul(w.T, X[:,n]))
+        y_hat2.append(predn)
+
+    print("y_hat2", y_hat2)
+
+    #print(accuracy(y_hat2, y))
+
+    # Task 3
+
+
+def gradient_sse(X, y, w, i):
+    delta = 0
+    for n, _ in enumerate(X):
+        delta += -2 * (y[n] - logsig(np.matmul(w.T, X[:,n]))) * logsig(np.matmul(w.T, X[:,n])) * (1 - logsig(np.matmul(w.T, X[:,n]))) * X[i,n]
+
+    return delta
+
+def gradient_ml(X, y, w, i):
+    delta = 0
+    for n, _ in enumerate(X):
+        if y[n] == 0:
+            delta += -logsig(-w.T*X[n])
+        if y[n] == 1:
+            delta += (1-logsig(-w.T*X[n]))
+
+    return delta
+
+def logsig(x):
     """
-    d = (2 * np.matmul(np.transpose(y), X) * np.exp( np.matmul(np.transpose(w), X)) )/(1 + np.exp( np.matmul(np.transpose(w), X) ))^2\
-        - (2*X*np.exp( np.matmul(np.transpose(w), X) ))/(1 + np.exp( np.matmul(np.transpose(w), X) ))^3
+    Sigmoid function
     """
-    d = (2 * np.transpose(y) * X) * np.exp( np.transpose(w) * X )/(1 + np.exp( np.transpose(w) * X) )^2\
-        - (2*X*np.exp( np.transpose(w) * X) )/(1 + np.exp( np.transpose(w) * X) )^3
-
-def get_data():
-    pass
+    return 1/(1+np.exp(-x))
 
 def accuracy(prediction, validation):
     correct = 0
@@ -57,6 +107,12 @@ def accuracy(prediction, validation):
             correct += 1
             
     return correct/len(prediction)
+
+def plot_weights(w_list, sklearn):
+    plt.figure()
+    plt.scatter(x=w_list[:,0], y=w_list[:,1])
+    plt.scatter(x=sklearn[0][0], y=sklearn[0][1])
+    plt.show()
 
 if __name__ == '__main__':
     main()
