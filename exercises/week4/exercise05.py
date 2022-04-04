@@ -6,26 +6,46 @@ Ossi Koski
 
 from PIL import Image
 
-#import keras
+import keras
 import numpy as np
-#import tensorflow as tf
+import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 def main():
+    layers = 100
+    epochs = 10
     X_train, X_test, y_train, y_test = get_data()
+    X_train, X_test = X_train / 255.0, X_test / 255.0  # Scale values
 
-    print(X_train)
-
+    #print("\n\nytrain", y_train)
+    #print("\n\nytest", y_test)
+    
     # Task 2: Define network
-    #model = tf.keras.models.Sequential()
-    #model.add(keras.layers.Flatten(input_shape=(4096, 3)))
-    #model.add(keras.layers.Dense(10, activation='sigmoid'))
-    #model.add(keras.layers.Dense(10, activation='sigmoid'))
-    #model.add(keras.layers.Dense(10, activation='sigmoid'))
+    model = tf.keras.models.Sequential()
+    model.add(keras.layers.Flatten(input_shape=(4096, 3)))
+    model.add(keras.layers.Dense(layers, activation='sigmoid'))
+    model.add(keras.layers.Dense(layers, activation='sigmoid'))
+    model.add(keras.layers.Dense(1, activation='sigmoid'))
 
-    # Task 3: Compile and train the net
-    #loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-    #model.compile(optimizer='SGD')
+    # Task 3: Compile and train the net and compute test set accuracy
+    loss_fn = tf.keras.losses.BinaryCrossentropy()  # from_logits=True
+    model.compile(optimizer='SGD', loss=loss_fn, metrics=['accuracy'])
+    model.summary()
+
+    model.fit(X_train, y_train, epochs=epochs)
+    
+    y_hat = model.predict(X_test)
+
+    for i, pred in enumerate(y_hat):
+        if pred > 0.5:
+            y_hat[i] = 1
+        if pred <= 0.5:
+            y_hat[i] = 0
+
+    #print("\n\ny_hat", y_hat)
+    print("Accuracy: ", accuracy(y_test, y_hat))
+
+    model.evaluate(X_test,  y_test, verbose=2)
 
 def get_data():
     """
@@ -36,8 +56,8 @@ def get_data():
     X = np.zeros(shape=(659, 4096, 3))
 
     # Ground thruth values
-    y = np.ones(shape=(659))
-    y[450:] = 2
+    y = np.zeros(shape=(659))
+    y[450:] = 1
 
     i = 0
     for c, r in enumerate([450, 209]):  # Iterate class 1 and 2
@@ -50,7 +70,16 @@ def get_data():
             X[i] = pix_ar
             i += 1
 
-    return train_test_split(X, y, test_size=0.2)
+    print("\n\ny:", y)
+    return train_test_split(X, y, test_size=0.2, random_state=42)
+
+def accuracy(prediction, validation):
+    correct = 0
+    for i, predicted in enumerate(prediction):
+        if predicted == validation[i]:
+            correct += 1
+
+    return correct/len(prediction)
 
 if __name__ == '__main__':
     main()
