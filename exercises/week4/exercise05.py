@@ -50,7 +50,7 @@ def main():
 def get_data():
     """
     Task 1
-    Get picture pixel valeus and split into training and testing data (80-20)
+    Get picture pixel values and split into training and testing data (80-20)
     """
     # Array to save pixel values in
     X = np.zeros(shape=(659, 4096, 3))
@@ -63,14 +63,13 @@ def get_data():
     for c, r in enumerate([450, 209]):  # Iterate class 1 and 2
         for num_img in range(r):  # Iterate pics
             num_img_str = (3-len(str(num_img)))*'0' + str(num_img)
-            img = Image.open(f'./GTSRB_subset_2/class{c+1}/{num_img_str}.jpg', 'r')
+            img = Image.open(f'../../data/GTSRB_subset_2/class{c+1}/{num_img_str}.jpg', 'r')
             pix_val = list(img.getdata())
             pix_ar = np.array(pix_val)
 
             X[i] = pix_ar
             i += 1
 
-    print("\n\ny:", y)
     return train_test_split(X, y, test_size=0.2, random_state=42)
 
 def accuracy(prediction, validation):
