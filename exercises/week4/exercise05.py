@@ -23,8 +23,8 @@ def main():
     # Task 2: Define network
     model = tf.keras.models.Sequential()
     model.add(keras.layers.Flatten(input_shape=(4096, 3)))
-    model.add(keras.layers.Dense(layers, activation='sigmoid'))
-    model.add(keras.layers.Dense(layers, activation='sigmoid'))
+    model.add(keras.layers.Dense(layers, activation='relu'))
+    model.add(keras.layers.Dense(layers, activation='relu'))
     model.add(keras.layers.Dense(1, activation='sigmoid'))
 
     # Task 3: Compile and train the net and compute test set accuracy
