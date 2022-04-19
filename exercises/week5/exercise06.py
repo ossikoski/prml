@@ -16,22 +16,19 @@ def main():
     epochs = 20
     X_train, X_test, y_train, y_test = get_data()
     X_train, X_test = X_train / 255.0, X_test / 255.0  # Scale values
-
-    #print("\n\nytrain", y_train)
-    #print("\n\nytest", y_test)
     
     # Task 2: Define network
     model = tf.keras.models.Sequential()
     model.add(keras.layers.Conv2D(10, 3, strides=2, activation='relu', input_shape=(64, 64, 3)))
     model.add(keras.layers.MaxPooling2D((2,2)))
-    model.add(keras.layers.Conv2D(10, 3, strides=2, activation='relu', input_shape=(64, 64, 3)))
+    model.add(keras.layers.Conv2D(10, 3, strides=2, activation='relu'))
     model.add(keras.layers.MaxPooling2D((2,2)))
     model.add(keras.layers.Flatten())
 
     model.add(keras.layers.Dense(1, activation='sigmoid'))
 
     # Task 3: Compile and train the net and compute test set accuracy
-    loss_fn = tf.keras.losses.BinaryCrossentropy()  # from_logits=True
+    loss_fn = tf.keras.losses.BinaryCrossentropy()
     model.compile(optimizer='SGD', loss=loss_fn, metrics=['accuracy'])
     model.summary()
 
@@ -47,7 +44,6 @@ def main():
         if pred <= 0.5:
             y_hat[i] = 0
 
-    #print("\n\ny_hat", y_hat)
     print("Accuracy: ", accuracy(y_test, y_hat))
 
     model.evaluate(X_test,  y_test, verbose=2)
